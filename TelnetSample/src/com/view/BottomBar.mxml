@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:HGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx">
+	<fx:Script>
+		<![CDATA[
+			[Bindable] public var username:String;
+			
+			protected function onKeyDown(event:KeyboardEvent):void
+			{
+				if( event.keyCode == Keyboard.ENTER ){
+					if( currentState == "login" ){
+						dispatchEvent( new Event( "loginEvent" ) );
+						currentState = "chat";
+					} else {
+						dispatchEvent( new Event( 'sendEvent' ) );
+					}
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Metadata>
+		[Event(name="loginEvent", type="flash.events.Event")]
+		[Event(name="sendEvent", type="flash.events.Event")]
+	</fx:Metadata>
+	<s:states>
+		<s:State name="login"/>
+		<s:State name="chat"/>
+	</s:states>
+	
+	<s:HGroup width="100%" verticalAlign="middle" excludeFrom="chat" 
+			  paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+		<s:Label text="User Name:"/>
+		<s:TextInput width="100%" 
+					 text="@{username}"
+					 keyDown="onKeyDown(event)"/>
+		<s:Button label="Connect" click="currentState='chat'; dispatchEvent( new Event( 'loginEvent' ) );"/>
+	</s:HGroup>
+	<s:HGroup width="100%" verticalAlign="middle" excludeFrom="login"
+			  paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+		<s:Label text="Enter Text:"/>
+		<s:TextInput id="cmd" width="100%" keyDown="onKeyDown(event)"/>
+		<s:Button label="Send" click="dispatchEvent( new Event( 'sendEvent' ) );"/>
+		<!--
+		<s:Button label="Stop" click="onStop(event)"/>
+		-->
+	</s:HGroup>
+	
+</s:HGroup>

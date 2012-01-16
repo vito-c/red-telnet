@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:HGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx">
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.events.CollectionEvent;
+			import mx.events.CollectionEventKind;
+			
+			private var _usersDictionary:Dictionary;
+			[Bindable] private var _usersCollection:ArrayCollection;
+			
+			[Bindable] public var memoryUsage:ArrayCollection = new ArrayCollection();
+			
+			[Bindable(event="change")]
+			public function set users( value:ArrayCollection ):void
+			{
+				if( value != _usersCollection ){
+					if( _usersCollection ){
+						_usersCollection.removeEventListener( CollectionEvent.COLLECTION_CHANGE, onUsersChange );
+					}
+					
+					_usersCollection = value;
+					_usersDictionary = new Dictionary();
+					for (var i:int = 0; i < _usersCollection.length; i++) 
+					{
+						var user:Object = _usersCollection.getItemAt(i);
+						_usersDictionary[ user.id ] = user;
+					}
+					
+					if( _usersCollection ){
+						_usersCollection.addEventListener( CollectionEvent.COLLECTION_CHANGE, onUsersChange );
+					}
+					dispatchEvent( new Event( "change" ) );	
+				}
+			}
+			
+			public function get users():ArrayCollection
+			{
+				return _usersCollection;
+			}
+			
+			public function removeUser( id:uint ):Object
+			{
+				if( _usersDictionary[ id ] ){
+					var index:int = _usersCollection.getItemIndex( _usersDictionary[ id ] );
+					return _usersCollection.removeItemAt( index );
+				}
+				return null;
+			}
+			
+			private function onUsersChange( event:CollectionEvent ):void
+			{
+				var user:Object;
+				var i:int;
+				var items:Array = event.items;
+				switch( event.kind )
+				{
+					case CollectionEventKind.ADD:
+						for ( i = 0; i < items.length; i++) 
+						{
+							user = items[i];
+							_usersDictionary[ user.id ] = items[i];
+						}
+						dispatchEvent( new Event( "change" ) );
+					break;
+					case CollectionEventKind.REMOVE:
+						for ( i = 0; i < items.length; i++) 
+						{
+							user = items[i];
+							delete _usersDictionary[ user.id ];
+						}
+						dispatchEvent( new Event( "change" ) );
+					break;
+					case CollectionEventKind.REFRESH: 
+						
+						dispatchEvent( new Event( "change" ) );
+					break;
+					case CollectionEventKind.REPLACE: 
+//						_usersDictionary = new Dictionary();
+//						for (var i:int = 0; i < _usersCollection.length; i++) 
+//						{
+//							var user:Object = _usersCollection.getItemAt(i);
+//							_usersDictionary[ user.id ] = user;
+//						}
+						dispatchEvent( new Event( "change" ) );
+					break;
+						
+					default:
+						dispatchEvent( new Event( "change" ) );
+					break;
+				}
+				
+			}
+			
+			[Bindable] public function get message():String
+			{
+				return output.text; 
+			}
+		
+			public function set message(value:String):void
+			{
+				output.appendText( value );
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:states>
+		<s:State name="admin"/>
+	</s:states>
+	<s:List width="200" height="100%" dataProvider="{_usersCollection}"/>
+	<s:TextArea id="output" width="100%" height="100%" 
+				paddingLeft="5" paddingRight="5" selectable="true" editable="false"/>
+	<mx:LineChart id="chart" includeIn="admin"
+				  width="100%" height="100%"
+				  dataProvider="{memoryUsage}" 
+				  showDataTips="true">
+		<mx:horizontalAxis>
+			<mx:LinearAxis/>
+		</mx:horizontalAxis>
+		
+		<mx:verticalAxis>
+			<mx:LinearAxis minimum="1000000" />
+		</mx:verticalAxis>
+		<mx:series>
+			<fx:Array>
+				<mx:LineSeries yField="memory"/>
+			</fx:Array>
+		</mx:series>
+	</mx:LineChart>
+	
+</s:HGroup>
